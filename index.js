@@ -1,13 +1,17 @@
 var stream = require('stream');
+var stringifyObject = require('stringify-object');
+var util = require('util');
 
 /**
 * Extract the first, last or offsetted JSON stream from a text stream
 * @param {string|array <string>|Buffer|Stream} data The data to process
 * @param {Object} [options] Additional options
-* @param {string} [options.want="object"] How to extract the JSON, can be "object", "string"
+* @param {string} [options.want="object"] How to extract the JSON, can be "object", "string" (valid JSON), "js" (JavaScript object encoding)
 * @param {boolean} [options.all=false] Return all found blocks (possibly restricted by `options.limit`) instead of the one matching the criteria in `options.offset`
 * @param {string|number} [options.offset="first"] Either the numeric offset of the JSON blob to extract or 'first', 'last', 'largest', 'smallest' (if "first" this implies `options.limit=1`)
 * @param {number} [options.limit=0] Restrict search to only this number of found blocks, if falsy all are searched
+* @param {string} [options.prettyPrint=true] Whether to format the output JS when `want="js|string"`
+* @param {string} [options.indent="\t"] The indenting method to use when `want="js|string"`
 * @returns {Promise} Promise which resolves with the extracted JSON
 */
 module.exports = function(data, options) {
@@ -16,6 +20,8 @@ module.exports = function(data, options) {
 		want: 'object',
 		offset: 'first',
 		limit: 0,
+		prettyPrint: true,
+		indent: '\t',
 		...options,
 	};
 
@@ -86,7 +92,11 @@ module.exports = function(data, options) {
 			// }}}
 
 			// (want=object) Convert into objects {{{
-			if (settings.want == 'object') {
+			if (
+				settings.want == 'object'
+				|| settings.want == 'js' // if want="js" we need it as an object first
+				|| (settings.want == 'string' && settings.prettyPrint) // Same with string but only if we need to pretty print
+			) {
 				session.result = session.result.map(i => {
 					try {
 						return JSON.parse(i);
@@ -94,6 +104,19 @@ module.exports = function(data, options) {
 						return {error: e, raw: i};
 					}
 				});
+			}
+
+			if (settings.want == 'string') {
+				session.result = session.result.map(r =>
+					settings.prettyPrint
+						?  JSON.stringify(r, null, settings.indent)
+						: JSON.stringify(r)
+				);
+			} else if (settings.want == 'js') {
+				session.result = session.result.map(r => stringifyObject(r, {
+					indent: settings.indent,
+					singleQuotes: false,
+				}));
 			}
 			// }}}
 

@@ -27,4 +27,10 @@ describe('simple tests', ()=> {
 		expect(jaywalker(junkStr, {limit: 2})).to.eventually.deep.equal({f: "F!"}, {bar: [{baz: "Baz!"}, 2, 3]});
 	});
 
+	it('should be able to output as strings', ()=> {
+		var junkStr = 'ab{"f": "F!"}cde{"bar": [{"baz": "Baz!"}, 2, 3]}fghijk{"quz": 123}lmnopq';
+		expect(jaywalker(junkStr, {offset: 'smallest', want: 'string'})).to.eventually.deep.equal(`{\n\t"f": "F!"\n}`);
+		expect(jaywalker(junkStr, {offset: 'smallest', want: 'js'})).to.eventually.deep.equal(`{\n\tf: "F!"\n}`);
+	});
+
 });
