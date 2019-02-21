@@ -1,7 +1,7 @@
 {
   "name": "jaywalker",
   "version": "0.0.0",
-  "description": "Extract the first, last or offsetted JSON stream from a text stream - includes CLI tool",
+  "description": "Extract JSON from a stream of junk text - includes CLI tool",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
