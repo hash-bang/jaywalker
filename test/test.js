@@ -27,6 +27,11 @@ describe('simple tests', ()=> {
 		expect(jaywalker(junkStr, {limit: 2})).to.eventually.deep.equal({f: "F!"}, {bar: [{baz: "Baz!"}, 2, 3]});
 	});
 
+	it('should support Hanson + JS Object notation as input', ()=> {
+		expect(jaywalker('abc{foo: "Foo!"}def', {want: 'string'})).to.eventually.deep.equal(`{\n\t"foo": "Foo!"\n}`);
+		expect(jaywalker('abc{foo: "Foo!", /* Comment */\nbar: 123}def', {want: 'js'})).to.eventually.deep.equal(`{\n\tfoo: "Foo!",\n\tbar: 123\n}`);
+	});
+
 	it('should be able to output as strings', ()=> {
 		var junkStr = 'ab{"f": "F!"}cde{"bar": [{"baz": "Baz!"}, 2, 3]}fghijk{"quz": 123}lmnopq';
 		expect(jaywalker(junkStr, {offset: 'smallest', want: 'string'})).to.eventually.deep.equal(`{\n\t"f": "F!"\n}`);

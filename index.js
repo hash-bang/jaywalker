@@ -1,3 +1,4 @@
+var hanson = require('hanson');
 var stream = require('stream');
 var stringifyObject = require('stringify-object');
 var util = require('util');
@@ -12,6 +13,7 @@ var util = require('util');
 * @param {number} [options.limit=0] Restrict search to only this number of found blocks, if falsy all are searched
 * @param {string} [options.prettyPrint=true] Whether to format the output JS when `want="js|string"`
 * @param {string} [options.indent="\t"] The indenting method to use when `want="js|string"`
+* @param {boolean} [options.hanson=true] Run the input JSON though Hanson first to strip out comments and support JS object syntax
 * @returns {Promise} Promise which resolves with the extracted JSON
 */
 module.exports = function(data, options) {
@@ -22,6 +24,7 @@ module.exports = function(data, options) {
 		limit: 0,
 		prettyPrint: true,
 		indent: '\t',
+		hanson: true,
 		...options,
 	};
 
@@ -99,7 +102,7 @@ module.exports = function(data, options) {
 			) {
 				session.result = session.result.map(i => {
 					try {
-						return JSON.parse(i);
+						return settings.hanson ? hanson.parse(i) : JSON.parse(i);
 					} catch (e) {
 						return {error: e, raw: i};
 					}
