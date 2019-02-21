@@ -14,6 +14,7 @@ program
 	.option('--largest', 'Return the largest found JSON blob')
 	.option('--smallest', 'Return the smallest found JSON blob')
 	.option('--limit <number>', 'Limit processing to only this number of JSON blobs')
+	.option('--no-pretty', 'Disable pretty printing')
 	.option('-v, --verbose', 'Be verbose')
 	.parse(process.argv);
 
@@ -30,6 +31,7 @@ Promise.resolve()
 			: program.smallest ? 'smallest'
 			: 'largest',
 		limit: program.limit,
+		prettyPrint: program.pretty,
 	}))
 	// }}}
 	// Output options if (--verbose) {{{

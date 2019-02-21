@@ -1,5 +1,6 @@
 var hanson = require('hanson');
 var stream = require('stream');
+var stripAnsi = require('strip-ansi');
 var stringifyObject = require('stringify-object');
 var util = require('util');
 
@@ -13,6 +14,7 @@ var util = require('util');
 * @param {number} [options.limit=0] Restrict search to only this number of found blocks, if falsy all are searched
 * @param {string} [options.prettyPrint=true] Whether to format the output JS when `want="js|string"`
 * @param {string} [options.indent="\t"] The indenting method to use when `want="js|string"`
+* @param {boolean} [options.stripAnsi=true] Try to remove all ANSI escape codes before decoding
 * @param {boolean} [options.hanson=true] Run the input JSON though Hanson first to strip out comments and support JS object syntax
 * @returns {Promise} Promise which resolves with the extracted JSON
 */
@@ -25,6 +27,7 @@ module.exports = function(data, options) {
 		prettyPrint: true,
 		indent: '\t',
 		hanson: true,
+		stripAnsi: true,
 		...options,
 	};
 
@@ -76,6 +79,12 @@ module.exports = function(data, options) {
 			return session;
 		})
 		// }}}
+		// Strip ANSI sequences {{{
+		.then(session => {
+			if (settings.stripAnsi) session.result = session.result.map(r => stripAnsi(r));
+			return session;
+		})
+		// }}}
 		// Format results into required format + return {{{
 		.then(session => {
 			// (offset) Narrow down results {{{
@@ -94,7 +103,7 @@ module.exports = function(data, options) {
 			}
 			// }}}
 
-			// (want=object) Convert into objects {{{
+			// (want) Convert into required format {{{
 			if (
 				settings.want == 'object'
 				|| settings.want == 'js' // if want="js" we need it as an object first
@@ -109,7 +118,7 @@ module.exports = function(data, options) {
 				});
 			}
 
-			if (settings.want == 'string') {
+			if (settings.want == 'string' && settings.prettyPrint) {
 				session.result = session.result.map(r =>
 					settings.prettyPrint
 						?  JSON.stringify(r, null, settings.indent)

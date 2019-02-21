@@ -1,6 +1,7 @@
 var chai = require('chai');
 var expect = chai.expect;
 var jaywalker = require('..');
+var util = require('util');
 chai.use(require("chai-as-promised"));
 
 describe('simple tests', ()=> {
@@ -36,6 +37,10 @@ describe('simple tests', ()=> {
 		var junkStr = 'ab{"f": "F!"}cde{"bar": [{"baz": "Baz!"}, 2, 3]}fghijk{"quz": 123}lmnopq';
 		expect(jaywalker(junkStr, {offset: 'smallest', want: 'string'})).to.eventually.deep.equal(`{\n\t"f": "F!"\n}`);
 		expect(jaywalker(junkStr, {offset: 'smallest', want: 'js'})).to.eventually.deep.equal(`{\n\tf: "F!"\n}`);
+	});
+
+	it('should support ANSI junk in input', ()=> {
+		expect(jaywalker(util.inspect({foo: 'Foo!'}, {colors: true, compact: false}))).to.eventually.deep.equal({foo: 'Foo!'});
 	});
 
 });
