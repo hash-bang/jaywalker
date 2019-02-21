@@ -19,17 +19,7 @@ var util = require('util');
 * @returns {Promise} Promise which resolves with the extracted JSON
 */
 module.exports = function(data, options) {
-	var settings = {
-		all: false,
-		want: 'object',
-		offset: 'first',
-		limit: 0,
-		prettyPrint: true,
-		indent: '\t',
-		hanson: true,
-		stripAnsi: true,
-		...options,
-	};
+	var settings = {...module.exports.defaults, ...options};
 
 	return Promise.resolve({})
 		// Options processing {{{
@@ -136,4 +126,15 @@ module.exports = function(data, options) {
 		})
 		.then(session => settings.all ? session.result : session.result[0])
 		// }}}
+};
+
+module.exports.defaults = {
+	all: false,
+	want: 'object',
+	offset: 'first',
+	limit: 0,
+	prettyPrint: true,
+	indent: '\t',
+	hanson: true,
+	stripAnsi: true,
 };
